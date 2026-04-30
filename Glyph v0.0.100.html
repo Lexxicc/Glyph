@@ -65,10 +65,10 @@
         /* Tile & Key States */
         .tile-correct { background-color: #54D8A8; color: #002D47; box-shadow: inset -4px -4px 0 0 #3ea17e; }
         .tile-present { background-color: #FACC15; color: #002D47; box-shadow: inset -4px -4px 0 0 #ca8a04; }
-        .tile-absent { background-color: #ef4444; color: #002D47; box-shadow: inset -4px -4px 0 0 #b91c1c; opacity: 0.6; }
+        .tile-absent { background-color: #3a3a3a; color: #aaaaaa; box-shadow: inset -4px -4px 0 0 #222222; }
 
         /* Greyed out keyboard state */
-        .key-absent  { background-color: #001A29 !important; color: #003D5B !important; box-shadow: none !important; opacity: 0.4; }
+        .key-absent  { background-color: #2a2a2a !important; color: #666666 !important; box-shadow: inset -4px -4px 0 0 #1a1a1a !important; }
         .key-correct { background-color: #54D8A8 !important; color: #002D47 !important; box-shadow: inset -4px -4px 0 0 #3ea17e !important; }
         .key-present { background-color: #FACC15 !important; color: #002D47 !important; box-shadow: inset -4px -4px 0 0 #ca8a04 !important; }
 
@@ -102,7 +102,7 @@
         <div id="game-header" class="w-full max-w-4xl flex flex-col items-center mb-12 pt-12 transition-all">
             <h1 class="text-5xl md:text-7xl tracking-normal text-glow mb-6 cursor-pointer" onclick="changeView('START')">GLYPH</h1>
             <div class="w-64 h-3 bg-[#54D8A8] rounded-full mb-6 shadow-[0_0_15px_#54D8A8]"></div>
-            <p class="text-[10px] md:text-[12px] uppercase tracking-[0.6em] opacity-80 text-center">STRATEGIC WORD ENGINE</p>
+            <p class="text-[10px] md:text-[12px] uppercase tracking-[0.6em] opacity-80 text-center">COMPETITIVE WORD PUZZLE</p>
         </div>
 
         <!-- Main View Area -->
@@ -869,7 +869,7 @@
             "ZORRO","ZORSE","ZOUKS","ZOWEE","ZOWIE","ZULUS","ZUPAN","ZUPAS","ZUPPA","ZURFS","ZUZIM","ZYGAL","ZYGON","ZYMES","ZYMIC"
         ]);
         const WORDS_TO_SOLVE = 3;
-        const GUESSES_PER_WORD = 5;
+        const GUESSES_PER_WORD = 6;
         const WORD_LENGTH = 5;
         const COUNTDOWN_START = 600;
         const STORAGE_KEY = 'glyph_arcade_stats';
@@ -1165,6 +1165,24 @@
             }
         }
 
+        function setupMobileInput() {
+            const input = document.getElementById('mobile-input');
+            if (!input) return;
+            input.value = '​';
+            input.addEventListener('input', function(e) {
+                if (state.view !== 'PLAYING' || state.isLocked) return;
+                if (e.data && /^[A-Za-z]$/.test(e.data)) {
+                    handleInput(e.data.toUpperCase());
+                } else if (!e.data || this.value.length === 0) {
+                    handleInput('BKSP');
+                }
+                this.value = '​';
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { handleInput('ENTER'); e.preventDefault(); }
+            });
+        }
+
         function render() {
             if (state.view === 'START') {
                 viewEl.innerHTML = `
@@ -1253,8 +1271,13 @@
                         <div class="h-10 mb-2 text-[10px] flex items-center justify-center text-center px-4">
                             ${state.message ? `<span class="blink">[ ${state.message} ]</span>` : ''}
                         </div>
-                        <div class="grid grid-rows-5 gap-3 mb-6 p-6 pixel-border">
-                            ${Array.from({length: 5}).map((_, i) => {
+                        <input id="mobile-input" type="text"
+                            autocomplete="off" autocorrect="off" autocapitalize="characters"
+                            spellcheck="false" enterkeyhint="go"
+                            style="position:fixed;top:-200px;left:-200px;width:1px;height:1px;opacity:0;">
+                        <div class="grid grid-rows-6 gap-3 mb-6 p-6 pixel-border cursor-pointer"
+                             ontouchstart="document.getElementById('mobile-input').focus()">
+                            ${Array.from({length: 6}).map((_, i) => {
                                 const guess = state.guesses[i] || "";
                                 const isCurrent = i === state.guesses.length;
                                 const rowStatuses = i < state.guesses.length ? getRowStatuses(guess, target) : [];
@@ -1262,13 +1285,13 @@
                                     ${Array.from({length: 5}).map((_, j) => {
                                         let char = isCurrent ? (state.currentGuess[j] || "") : (guess[j] || "");
                                         let cls = i < state.guesses.length ? rowStatuses[j] : (isCurrent && char ? 'tile-active' : 'tile-empty');
-                                        return `<div class="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center text-2xl sm:text-4xl font-black ${cls}">${char}</div>`;
+                                        return `<div class="w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center text-xl sm:text-3xl font-black ${cls}">${char}</div>`;
                                     }).join('')}
                                 </div>`;
                             }).join('')}
                         </div>
                         <div class="w-full max-w-lg grid gap-3 px-2 mb-10">
-                            ${[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['ENTER','Z','X','C','V','B','N','M','BKSP']].map(row => `
+                            ${[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['BKSP','Z','X','C','V','B','N','M','ENTER']].map(row => `
                                 <div class="flex justify-center gap-2">
                                     ${row.map(key => {
                                         const keyCls = keyStates[key] || '';
@@ -1285,6 +1308,7 @@
                         </button>
                     </div>`;
                 updateTimerUI();
+                setupMobileInput();
             } else if (state.view === 'FINISHED') {
                 const finalScore = calculateScore();
                 viewEl.innerHTML = `
