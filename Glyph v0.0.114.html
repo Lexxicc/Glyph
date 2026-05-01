@@ -62,6 +62,27 @@
             box-shadow: inset 4px 4px 0 0 #991b1b;
         }
 
+        /* Secondary (dark bg) button */
+        .pixel-btn-secondary {
+            background: #001D2E;
+            color: #54D8A8;
+            box-shadow:
+                0 -2px 0 0 #54D8A8,
+                0 2px 0 0 #54D8A8,
+                -2px 0 0 0 #54D8A8,
+                2px 0 0 0 #54D8A8,
+                inset -4px -4px 0 0 #3ea17e;
+        }
+        .pixel-btn-secondary:active {
+            box-shadow:
+                0 -2px 0 0 #54D8A8,
+                0 2px 0 0 #54D8A8,
+                -2px 0 0 0 #54D8A8,
+                2px 0 0 0 #54D8A8,
+                inset 4px 4px 0 0 #3ea17e;
+            transform: translateY(2px);
+        }
+
         /* Tile & Key States */
         .tile-correct { background-color: #54D8A8; color: #002D47; box-shadow: inset -4px -4px 0 0 #3ea17e; }
         .tile-present { background-color: #FACC15; color: #002D47; box-shadow: inset -4px -4px 0 0 #ca8a04; }
@@ -112,7 +133,7 @@
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            Ver 0.0.112 • Tacticon Studios • © 2026
+            Ver 0.0.114 • Tacticon Studios • © 2026
         </div>
     </div>
 
@@ -994,7 +1015,6 @@
             isLocked: false,
             stats: loadStats(),
             matchSeed: null,
-            isChallenge: false,
             opponentData: null,
             antiBot: { guessTimestamps: [], keyTimestamps: [], lastGuessTime: 0, fastGuessCount: 0 }
         };
@@ -1072,16 +1092,27 @@
             changeView('START');
         }
 
-        function startSolo() { state.opponentData = null; state.isChallenge = false; startMatch({}); }
-        function startChallenge() { state.opponentData = null; state.isChallenge = true; startMatch({ challenge: true }); }
+        function showMatchCode() {
+            const code = generateMatchCode();
+            const section = document.getElementById('share-code-section');
+            const btn = document.getElementById('share-btn');
+            if (section) {
+                section.innerHTML = `
+                    <div class="pixel-border p-4 w-full mb-2">
+                        <p class="text-[8px] text-[#54D8A8] mb-3 uppercase tracking-widest">Match Code — share with opponent</p>
+                        <p class="text-[7px] break-all opacity-80 mb-3 leading-relaxed">${code}</p>
+                        <button onclick="navigator.clipboard.writeText('${code}').then(()=>{this.textContent='COPIED!';setTimeout(()=>this.textContent='COPY CODE',1500)})"
+                            class="pixel-btn w-full text-[9px] py-2">COPY CODE</button>
+                    </div>`;
+            }
+            if (btn) btn.remove();
+        }
 
         function startMatch(options = {}) {
-            const isChallenge = options.challenge || !!options.seed;
-            const matchSeed = options.seed || (isChallenge ? generateMatchSeed() : null);
-            const targets = matchSeed ? getSeededWords(matchSeed) : getRandomWords();
-
+            const matchSeed = options.seed || generateMatchSeed();
+            const targets = getSeededWords(matchSeed);
+            if (!options.seed) state.opponentData = null;
             state.matchSeed = matchSeed;
-            state.isChallenge = isChallenge;
             state.targetWords = targets;
             state.currentIdx = 0;
             state.guesses = [];
@@ -1334,18 +1365,18 @@
             if (bar) bar.style.display = isPlaying ? 'none' : '';
             if (subtitle) subtitle.style.display = isPlaying ? 'none' : '';
             if (titleWrap) titleWrap.style.marginBottom = isPlaying ? '0' : '';
+            viewEl.style.justifyContent = state.view === 'START' ? 'flex-start' : '';
 
             if (state.view === 'START') {
                 viewEl.innerHTML = `
-                    <div class="w-full max-w-2xl flex flex-col items-center space-y-5 animate-fade-in px-4">
+                    <div class="w-full max-w-2xl flex flex-col items-center space-y-5 animate-fade-in px-4 pt-4 pb-6">
                         <div class="pixel-border p-4 text-center w-full max-w-[480px]">
                             <p class="text-[10px] md:text-[12px] mb-2 text-[#54D8A8] tracking-widest uppercase">HIGH SCORE</p>
                             <p class="text-3xl md:text-5xl text-glow">${state.stats.highScore}</p>
                         </div>
 
                         <div class="flex flex-col w-full max-w-[480px] space-y-3">
-                            <button onclick="startSolo()" class="pixel-btn w-full text-xl md:text-2xl py-4">SOLO MATCH</button>
-                            <button onclick="startChallenge()" class="pixel-btn w-full text-[14px] py-3" style="background:#001D2E;color:#54D8A8;box-shadow:inset -4px -4px 0 0 #3ea17e;">CHALLENGE</button>
+                            <button onclick="startMatch({})" class="pixel-btn w-full text-xl md:text-2xl py-4">START MATCH</button>
                             <div class="pixel-border p-3 w-full">
                                 <p class="text-[7px] text-[#54D8A8] mb-2 uppercase tracking-widest">Accept a challenge</p>
                                 <input id="challenge-code-input" type="text" placeholder="Paste match code..."
@@ -1353,7 +1384,7 @@
                                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                                 <p id="challenge-error" class="text-[7px] text-[#ef4444] mt-1" style="display:none">Invalid or tampered code.</p>
                             </div>
-                            <button onclick="acceptChallenge()" class="pixel-btn w-full text-[12px] py-3" style="background:#002D47;color:#54D8A8;box-shadow:inset -4px -4px 0 0 #3ea17e;">ACCEPT CHALLENGE</button>
+                            <button onclick="acceptChallenge()" class="pixel-btn pixel-btn-secondary w-full text-[12px] py-3">ACCEPT CHALLENGE</button>
                             <button onclick="changeView('RECORDS')" class="pixel-btn w-full text-[12px] md:text-[14px] py-3">MATCH HISTORY</button>
                             <button onclick="changeView('RULES')" class="pixel-btn w-full text-[12px] md:text-[14px] py-3">GAME RULES</button>
                         </div>
@@ -1450,18 +1481,21 @@
                                 </div>`;
                             }).join('')}
                         </div>
-                        <div class="w-full max-w-lg grid gap-1 px-1 mb-2">
-                            ${[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['BKSP','Z','X','C','V','B','N','M','ENTER']].map(row => `
-                                <div class="flex justify-center gap-[3px]">
-                                    ${row.map(key => {
-                                        const keyCls = keyStates[key] || '';
-                                        return `
-                                        <button onclick="handleInput('${key}')" class="pixel-btn ${keyCls} ${key.length > 1 ? 'px-2 text-[7px]' : 'w-7 text-[9px]'} h-10">
-                                            ${key === 'BKSP' ? '⌫' : key}
-                                        </button>`;
-                                    }).join('')}
-                                </div>
-                            `).join('')}
+                        <div class="w-full max-w-lg flex gap-1 px-1 mb-2">
+                            <div class="flex-1 grid gap-1">
+                                ${[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['Z','X','C','V','B','N','M']].map(row => `
+                                    <div class="flex justify-center gap-[3px]">
+                                        ${row.map(key => {
+                                            const keyCls = keyStates[key] || '';
+                                            return `<button onclick="handleInput('${key}')" class="pixel-btn ${keyCls} w-7 text-[9px] h-10">${key}</button>`;
+                                        }).join('')}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <button onclick="handleInput('BKSP')" class="pixel-btn pixel-btn-danger text-[7px] w-10 flex-1 flex items-center justify-center uppercase tracking-wider">DEL</button>
+                                <button onclick="handleInput('ENTER')" class="pixel-btn text-[7px] w-10 flex-1 flex items-center justify-center uppercase tracking-wider">ENTER</button>
+                            </div>
                         </div>
                         <button onclick="confirmForfeit()" class="pixel-btn pixel-btn-danger text-[10px] py-2 px-8 w-full max-w-[400px] uppercase tracking-widest">
                             forfeit, and back to main menu
@@ -1513,56 +1547,33 @@
                                     </div>
                                 </div>`;
                             }).join('')}
-                            <button onclick="changeView('START')" class="pixel-btn w-full text-[12px] py-3 mt-2" style="background:#54D8A8;color:#002D47;">MAIN MENU</button>
-                        </div>`;
-
-                } else if (state.isChallenge) {
-                    // ── Challenge P1 finished — show match code ────────────────
-                    const code = generateMatchCode();
-                    viewEl.innerHTML = `
-                        <div class="w-full max-w-2xl flex flex-col items-center animate-fade-in px-4 pb-4">
-                            <p class="text-glow text-xl mb-4 uppercase">Challenge Set!</p>
-                            <div class="grid grid-cols-2 gap-4 w-full mb-6">
-                                <div class="bg-[#002D47] p-4 pixel-border-small text-center">
-                                    <p class="text-[8px] mb-2 opacity-60 uppercase">Score</p>
-                                    <p class="text-2xl text-[#54D8A8]">${finalScore}</p>
-                                </div>
-                                <div class="bg-[#002D47] p-4 pixel-border-small text-center">
-                                    <p class="text-[8px] mb-2 opacity-60 uppercase">Solved</p>
-                                    <p class="text-2xl">${state.solvedCount}/3</p>
-                                </div>
-                            </div>
-                            <div class="pixel-border p-4 w-full mb-4">
-                                <p class="text-[8px] text-[#54D8A8] mb-3 uppercase tracking-widest">Match Code — share with opponent</p>
-                                <p id="match-code-display" class="text-[7px] break-all opacity-80 mb-3 leading-relaxed">${code}</p>
-                                <button onclick="navigator.clipboard.writeText('${code}').then(()=>{this.textContent='COPIED!';setTimeout(()=>this.textContent='COPY CODE',1500)})"
-                                    class="pixel-btn w-full text-[9px] py-2">COPY CODE</button>
-                            </div>
-                            <button onclick="changeView('START')" class="pixel-btn w-full text-[12px] py-3" style="background:#54D8A8;color:#002D47;">MAIN MENU</button>
+                            <button onclick="changeView('START')" class="pixel-btn w-full text-[12px] py-3 mt-2">MAIN MENU</button>
                         </div>`;
 
                 } else {
-                    // ── Solo finish ────────────────────────────────────────────
+                    // ── Solo / Challenge P1 finish ─────────────────────────────
                     viewEl.innerHTML = `
-                        <div class="w-full max-w-2xl pixel-border p-12 text-center animate-fade-in mx-4 shadow-xl">
-                            <p class="text-glow text-2xl mb-10 uppercase">Mission Clear</p>
-                            <div class="grid grid-cols-2 gap-6 mb-10">
-                                <div class="bg-[#002D47] p-6 pixel-border-small">
-                                    <p class="text-[10px] mb-4 opacity-60 uppercase">Solved</p>
+                        <div class="w-full max-w-2xl pixel-border p-10 text-center animate-fade-in mx-4">
+                            <p class="text-glow text-2xl mb-8 uppercase">Match Complete</p>
+                            <div class="grid grid-cols-2 gap-4 mb-8">
+                                <div class="bg-[#002D47] p-4 pixel-border-small">
+                                    <p class="text-[10px] mb-3 opacity-60 uppercase">Solved</p>
                                     <p class="text-lg">${state.solvedCount}/3</p>
                                 </div>
-                                <div class="bg-[#002D47] p-6 pixel-border-small">
-                                    <p class="text-[10px] mb-4 opacity-60 uppercase">Clock</p>
+                                <div class="bg-[#002D47] p-4 pixel-border-small">
+                                    <p class="text-[10px] mb-3 opacity-60 uppercase">Clock</p>
                                     <p class="text-lg">${Math.floor(state.timeLeft/60)}:${(state.timeLeft%60).toString().padStart(2,'0')}</p>
                                 </div>
                             </div>
-                            <div class="mb-12 p-10 bg-[#001D2E] pixel-border-small">
-                                <p class="text-[10px] mb-6 opacity-60 uppercase tracking-widest">Final Rating</p>
+                            <div class="mb-8 p-8 bg-[#001D2E] pixel-border-small">
+                                <p class="text-[10px] mb-4 opacity-60 uppercase tracking-widest">Final Rating</p>
                                 <p class="text-5xl md:text-7xl text-[#54D8A8] text-glow italic">${finalScore}</p>
                             </div>
-                            <button onclick="changeView('START')" class="pixel-btn w-full text-xl py-6" style="background:#54D8A8; color:#002D47;">
-                                BACK TO MAIN MENU
-                            </button>
+                            <div id="share-code-section"></div>
+                            <div class="flex flex-col space-y-3">
+                                <button id="share-btn" onclick="showMatchCode()" class="pixel-btn pixel-btn-secondary w-full text-[12px] py-3">SHARE AS CHALLENGE</button>
+                                <button onclick="changeView('START')" class="pixel-btn w-full text-[12px] py-3">MAIN MENU</button>
+                            </div>
                         </div>`;
                 }
             }
