@@ -133,7 +133,7 @@
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            Ver 0.0.115 • Tacticon Studios • © 2026
+            Ver 0.0.116 • Tacticon Studios • © 2026
         </div>
     </div>
 
@@ -1064,6 +1064,10 @@
             state.view = newView;
             if (newView === 'PLAYING') {
                 headerEl.classList.remove('mb-2', 'mb-12'); headerEl.classList.add('mb-4');
+                history.pushState({ view: 'game' }, '');
+            } else if (newView === 'RECORDS' || newView === 'RULES' || newView === 'FINISHED') {
+                headerEl.classList.remove('mb-4'); headerEl.classList.add('mb-2');
+                history.pushState({ view: newView }, '');
             } else {
                 headerEl.classList.remove('mb-4'); headerEl.classList.add('mb-2');
             }
@@ -1610,6 +1614,15 @@
             let k = e.key.toUpperCase();
             if (k === 'BACKSPACE') k = 'BKSP';
             if (k === 'ENTER' || k === 'BKSP' || /^[A-Z]$/.test(k)) handleInput(k);
+        });
+
+        window.addEventListener('popstate', () => {
+            if (state.view === 'PLAYING') {
+                history.pushState({ view: 'game' }, '');
+                executeForfeit();
+            } else if (state.view === 'RECORDS' || state.view === 'RULES' || state.view === 'FINISHED') {
+                changeView('START');
+            }
         });
 
         render();
