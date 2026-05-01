@@ -112,7 +112,7 @@
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            Ver 0.0.110 • Tacticon Studios • © 2026
+            Ver 0.0.112 • Tacticon Studios • © 2026
         </div>
     </div>
 
@@ -1005,7 +1005,12 @@
 
         function loadStats() {
             const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : { highScore: 0, matchHistory: [] };
+            if (!data) return { highScore: 0, matchHistory: [] };
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                return { highScore: 0, matchHistory: [] };
+            }
         }
 
         function saveMatch(score, isForfeit = false) {
@@ -1033,9 +1038,9 @@
         function changeView(newView) {
             state.view = newView;
             if (newView === 'PLAYING') {
-                headerEl.classList.replace('mb-12', 'mb-4');
+                headerEl.classList.remove('mb-2', 'mb-12'); headerEl.classList.add('mb-4');
             } else {
-                headerEl.classList.replace('mb-4', 'mb-12');
+                headerEl.classList.remove('mb-4'); headerEl.classList.add('mb-2');
             }
             render();
         }
@@ -1094,10 +1099,8 @@
                 if (state.timeLeft <= 0) {
                     state.timeLeft = 0;
                     clearInterval(state.timerInterval);
-                    if (state.guesses.length > 0) {
-                        state.history.push({ word: state.targetWords[state.currentIdx], guesses: [...state.guesses], solved: false });
-                    }
-                    state.view = 'FINISHED';
+                    state.history.push({ word: state.targetWords[state.currentIdx], guesses: [...state.guesses], solved: false });
+                    changeView('FINISHED');
                     saveMatch(calculateScore());
                     render();
                 }
@@ -1179,10 +1182,12 @@
             }
 
             if (!VALID_WORDS_SET.has(guess)) {
+                state.isLocked = true;
                 state.message = "NOT IN WORD LIST";
                 setTimeout(() => {
                     if (state.message === "NOT IN WORD LIST") {
                         state.message = "";
+                        state.isLocked = false;
                         render();
                     }
                 }, 1200);
@@ -1221,10 +1226,9 @@
                 state.message = "";
                 render();
             } else {
-                state.view = 'FINISHED';
                 clearInterval(state.timerInterval);
                 saveMatch(calculateScore());
-                render();
+                changeView('FINISHED');
             }
         }
 
