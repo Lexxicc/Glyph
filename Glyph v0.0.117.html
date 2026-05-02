@@ -122,7 +122,7 @@
         <!-- Header -->
         <div id="game-header" class="w-full max-w-4xl flex flex-col items-center mb-2 pt-2 transition-all">
             <div class="flex flex-col items-center w-fit mb-4" id="header-title-wrap">
-                <h1 class="text-5xl md:text-7xl tracking-tight text-glow mb-4 cursor-pointer" onclick="changeView('START')">GLYPH</h1>
+                <h1 class="text-5xl md:text-7xl tracking-tight text-glow mb-4 cursor-pointer" onclick="state.view === 'PLAYING' ? confirmForfeit() : changeView('START')">GLYPH</h1>
                 <div id="header-bar" class="w-full h-[3px] bg-[#54D8A8] rounded-full shadow-[0_0_15px_#54D8A8]"></div>
             </div>
             <p id="header-subtitle" class="text-[9px] md:text-[12px] uppercase tracking-[0.4em] opacity-80 text-center font-bold w-full">COMPETITIVE WORD PUZZLE</p>
@@ -133,7 +133,7 @@
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            Ver 0.0.116 • Tacticon Studios • © 2026
+            Ver 0.0.117 • Tacticon Studios • © 2026
         </div>
     </div>
 
@@ -955,7 +955,7 @@
         }
         function parseMatchCode(code) {
             try {
-                const padded = code + '==='.slice((code.length + 3) % 4);
+                const padded = code + '==='.slice(0, (4 - code.length % 4) % 4);
                 const wrapper = JSON.parse(atob(padded));
                 if (djb2hash(wrapper.d) !== wrapper.c) return null;
                 const data = JSON.parse(wrapper.d);
@@ -1041,8 +1041,8 @@
         function saveMatch(score, isForfeit = false) {
             state.stats.highScore = Math.max(state.stats.highScore, score);
             const roundsToSave = [...state.history];
-            if (isForfeit && state.guesses.length > 0) {
-                 roundsToSave.push({
+            if (isForfeit && state.targetWords.length > 0) {
+                roundsToSave.push({
                     word: state.targetWords[state.currentIdx],
                     guesses: [...state.guesses],
                     solved: false,
@@ -1619,7 +1619,7 @@
         window.addEventListener('popstate', () => {
             if (state.view === 'PLAYING') {
                 history.pushState({ view: 'game' }, '');
-                executeForfeit();
+                confirmForfeit();
             } else if (state.view === 'RECORDS' || state.view === 'RULES' || state.view === 'FINISHED') {
                 changeView('START');
             }
