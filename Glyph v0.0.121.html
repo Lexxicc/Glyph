@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLYPH - 8-BIT ARCADE</title>
+    <title>GLYPH v0.0.121 - 8-BIT ARCADE</title>
     <!-- Preconnect to font servers to reduce loading delay -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -133,7 +133,7 @@
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            Ver 0.0.120 • Tacticon Studios • © 2026
+            Ver 0.0.121 • Tacticon Studios • © 2026
         </div>
     </div>
 
@@ -141,7 +141,7 @@
     <div id="overlay" class="fixed inset-0 z-50 bg-[#002D47]/95 hidden items-center justify-center p-4 backdrop-blur-md"></div>
 
     <script>
-        (function(){ var _k='glyph_wipe_v120'; var prev=localStorage.getItem(_k); if(prev===null){ localStorage.setItem(_k,'1'); } else if(prev!=='1'){ localStorage.removeItem('glyph_arcade_stats'); localStorage.setItem(_k,'1'); } })();
+        (function(){ var _k='glyph_wipe_v121'; var prev=localStorage.getItem(_k); if(prev===null){ localStorage.setItem(_k,'1'); } else if(prev!=='1'){ localStorage.removeItem('glyph_arcade_stats'); localStorage.setItem(_k,'1'); } })();
 
         /** AUDIO ENGINE **/
         const _ac = { ctx: null };
@@ -1340,7 +1340,7 @@
                 solved: state.guesses.includes(state.targetWords[state.currentIdx].toUpperCase())
             });
             if (state.currentIdx < WORDS_TO_SOLVE - 1) {
-                sfxRoundClear();
+                if (state.history[state.history.length - 1].solved) sfxRoundClear();
                 state.currentIdx++;
                 state.guesses = [];
                 state.isLocked = false;
@@ -1503,6 +1503,7 @@
                             <details class="mt-8 border-t-2 border-[#003D5B] pt-6">
                                 <summary class="text-[9px] uppercase tracking-widest text-[#54D8A8]/70 mb-4">Patch Notes</summary>
                                 <ul class="text-[8px] leading-[2] space-y-3 text-[#76E0B9]/70 mt-4">
+                                    <li><span class="text-[#54D8A8]">v0.0.121</span> — Fixed 4 bugs: round-clear SFX now only plays on a solved word (not a failed one); grid rows/columns now use GUESSES_PER_WORD and WORD_LENGTH constants instead of hardcoded values; mute button label corrected (was showing MUTE when already muted).</li>
                                     <li><span class="text-[#54D8A8]">v0.0.120</span> — Add basic soundscape — Web Audio synthesised sounds. Mute/unmute toggle added.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.119</span> — Fixed 18 bugs: score drift on finish screen, timer format, duplicate words removed, clipboard fallback for non-HTTPS, forfeit overlay guard, mobile input delete detection, challenge code Enter key, back-button timer clear, header margin cleanup, and dev-console stability fixes.</li>
                                 </ul>
@@ -1560,7 +1561,7 @@
                                 <span class="text-[7px] mb-1 opacity-60 uppercase">CLOCK</span>
                                 <span id="timer-val" class="text-xs text-[#54D8A8]">0:00</span>
                             </div>
-                            <button onclick="_muted=!_muted;this.textContent=_muted?'MUTE':'SFX';_audioCtx();" style="min-width:44px;min-height:44px;" class="pixel-btn pixel-btn-secondary text-[7px] px-2 flex items-center justify-center">${_muted ? 'MUTE' : 'SFX'}</button>
+                            <button onclick="_muted=!_muted;this.textContent=_muted?'UNMUTE':'MUTE';_audioCtx();" style="min-width:44px;min-height:44px;" class="pixel-btn pixel-btn-secondary text-[7px] px-2 flex items-center justify-center">${_muted ? 'UNMUTE' : 'MUTE'}</button>
                         </div>
                         <div class="h-7 mb-1 text-[10px] flex items-center justify-center text-center px-4">
                             ${state.message ? `<span class="blink">[ ${state.message} ]</span>` : ''}
@@ -1569,14 +1570,15 @@
                             autocomplete="off" autocorrect="off" autocapitalize="characters"
                             spellcheck="false" enterkeyhint="go"
                             style="position:fixed;top:-200px;left:-200px;width:1px;height:1px;opacity:0;">
-                        <div class="grid grid-rows-6 gap-2 mb-2 p-3 pixel-border cursor-pointer"
+                        <div class="grid gap-2 mb-2 p-3 pixel-border cursor-pointer"
+                             style="grid-template-rows:repeat(${GUESSES_PER_WORD},minmax(0,1fr))"
                              ontouchstart="document.getElementById('mobile-input').focus()">
-                            ${Array.from({length: 6}).map((_, i) => {
+                            ${Array.from({length: GUESSES_PER_WORD}).map((_, i) => {
                                 const guess = state.guesses[i] || "";
                                 const isCurrent = i === state.guesses.length;
                                 const rowStatuses = i < state.guesses.length ? getRowStatuses(guess, target) : [];
                                 return `<div class="flex gap-2">
-                                    ${Array.from({length: 5}).map((_, j) => {
+                                    ${Array.from({length: WORD_LENGTH}).map((_, j) => {
                                         let char = isCurrent ? (state.currentGuess[j] || "") : (guess[j] || "");
                                         let cls = i < state.guesses.length ? rowStatuses[j] : (isCurrent && char ? 'tile-active' : 'tile-empty');
                                         return `<div class="w-10 h-10 flex items-center justify-center text-lg font-black ${cls}">${char}</div>`;
