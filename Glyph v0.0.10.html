@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLYPH v0.0.9 - 8-BIT ARCADE</title>
+    <title>GLYPH v0.0.10 - 8-BIT ARCADE</title>
     <!-- Preconnect to font servers to reduce loading delay -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -138,7 +138,7 @@
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            Ver 0.0.9 • Tacticon Studios • © 2026
+            Ver 0.0.10 • Tacticon Studios • © 2026
         </div>
     </div>
 
@@ -1037,6 +1037,8 @@
             }).join('');
         }
 
+        let roundResolved = false;
+
         let state = {
             view: 'START',
             targetWords: [],
@@ -1213,11 +1215,14 @@
             state.message = "";
             state.finalScore = null;
             state.antiBot = { guessTimestamps: [], keyTimestamps: [], lastGuessTime: 0, fastGuessCount: 0 };
+            roundResolved = false;
 
             clearInterval(state.timerInterval);
             state.timerInterval = setInterval(() => {
                 state.timeLeft = Math.max(0, state.timeLeft - 1);
                 if (state.timeLeft <= 0) {
+                    if (roundResolved) return;
+                    roundResolved = true;
                     sfxGameOver();
                     clearInterval(state.timerInterval);
                     state.timerInterval = null;
@@ -1289,6 +1294,7 @@
         }
 
         function submitGuess() {
+            if (roundResolved) return;
             if (state.currentGuess.length !== WORD_LENGTH || state.isLocked) return;
             const guess = state.currentGuess.toUpperCase();
             const now = Date.now();
@@ -1325,12 +1331,14 @@
             state.currentGuess = "";
 
             if (guess === target) {
+                roundResolved = true;
                 sfxValidWord();
                 state.solvedCount++;
                 state.message = "CLEARED!";
                 state.isLocked = true;
                 setTimeout(nextRound, 1200);
             } else if (state.guesses.length >= GUESSES_PER_WORD) {
+                roundResolved = true;
                 state.message = `FAIL! WORD: <span style="color:#ef4444">${target}</span>`;
                 state.isLocked = true;
                 setTimeout(nextRound, 2000);
@@ -1348,8 +1356,10 @@
                 if (state.history[state.history.length - 1].solved) sfxRoundClear();
                 state.currentIdx++;
                 state.guesses = [];
+                state.currentGuess = "";
                 state.isLocked = false;
                 state.message = "";
+                roundResolved = false;
                 render();
             } else {
                 sfxGameOver();
@@ -1380,6 +1390,8 @@
             state.guesses.push(target);
             state.allGuessesCount++;
             state.solvedCount++;
+            roundResolved = true;
+            state.currentGuess = "";
             state.message = "OVERRIDE: WIN";
             state.isLocked = true;
             closeOverlay();
@@ -1389,10 +1401,12 @@
 
         function devLose() {
             const target = state.targetWords[state.currentIdx].toUpperCase();
+            const dummy = "XXXXX";
             while(state.guesses.length < GUESSES_PER_WORD) {
-                state.guesses.push(target);
+                state.guesses.push(dummy);
                 state.allGuessesCount++;
             }
+            roundResolved = true;
             state.message = `FAIL! WORD: <span style="color:#ef4444">${target}</span>`;
             state.isLocked = true;
             closeOverlay();
@@ -1509,6 +1523,7 @@
                             <details class="mt-8 border-t-2 border-[#003D5B] pt-6">
                                 <summary class="text-[9px] uppercase tracking-widest text-[#54D8A8]/70 mb-4">Patch Notes</summary>
                                 <ul class="text-[8px] leading-[2] space-y-3 text-[#76E0B9]/70 mt-4">
+                                    <li><span class="text-[#54D8A8]">v0.0.10</span> — Fixed 4 bugs: timer/guess race condition now guarded by roundResolved flag; devLose no longer records round as solved; devWin now clears currentGuess so next round starts clean; popstate closes dev console and stops timer before restoring state.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.9</span> — UI Polish (2026-05-02): front page panel corner pixels filled; Accept Challenge button border cleaned up; grey line above footer removed; dead space below menu panel eliminated.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.121</span> — Fixed 4 bugs: round-clear SFX now only plays on a solved word (not a failed one); grid rows/columns now use GUESSES_PER_WORD and WORD_LENGTH constants instead of hardcoded values; mute button label corrected (was showing MUTE when already muted).</li>
                                     <li><span class="text-[#54D8A8]">v0.0.120</span> — Add basic soundscape — Web Audio synthesised sounds. Mute/unmute toggle added.</li>
@@ -1701,6 +1716,7 @@
             if (state.view === 'PLAYING') {
                 clearInterval(state.timerInterval);
                 state.timerInterval = null;
+                closeOverlay();
                 confirmForfeit();
             } else if (state.view === 'RECORDS' || state.view === 'RULES' || state.view === 'FINISHED') {
                 changeView('START');
