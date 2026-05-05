@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="author" content="lexxicc">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GLYPH v0.0.16 - 8-BIT ARCADE</title>
+    <title>GLYPH v0.0.17 - 8-BIT ARCADE</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#54d8a8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GLYPH">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');</script>
     <!-- Preconnect to font servers to reduce loading delay -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -145,7 +152,7 @@
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            Ver 0.0.15 • Tacticon Studios • © 2026
+            Ver 0.0.17 • Tacticon Studios • © 2026
         </div>
     </div>
 
@@ -1537,7 +1544,8 @@
                             <details class="mt-8 border-t-2 border-[#003D5B] pt-6">
                                 <summary class="text-[9px] uppercase tracking-widest text-[#54D8A8]/70 mb-4">Patch Notes</summary>
                                 <ul class="text-[8px] leading-[2] space-y-3 text-[#76E0B9]/70 mt-4">
-                                    <li><span class="text-[#00b4d8]">v0.0.16</span> — Mobile optimisation: added height: 100dvh, overflow: hidden, overscroll-behavior: none and safe-area inset padding; localStorage key standardised to GL prefix.</li>
+                                    <li><span class="text-[#00b4d8]">v0.0.17</span> — PWA install support added.</li>
+                                    <li><span class="text-[#54D8A8]">v0.0.16</span> — Mobile optimisation: added height: 100dvh, overflow: hidden, overscroll-behavior: none and safe-area inset padding; localStorage key standardised to GL prefix.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.15</span> — Version bump.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.14</span> — Grid line colour updated to gold.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.13</span> — Version bump.</li>
