@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="author" content="lexxicc">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GLYPH v0.0.15 - 8-BIT ARCADE</title>
+    <title>GLYPH v0.0.16 - 8-BIT ARCADE</title>
     <!-- Preconnect to font servers to reduce loading delay -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,9 +16,15 @@
             background-color: #00243a;
             color: #76E0B9;
             margin: 0;
-            overflow-x: hidden;
+            height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none;
             -webkit-tap-highlight-color: transparent;
             image-rendering: pixelated;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            padding-left: env(safe-area-inset-left, 0px);
+            padding-right: env(safe-area-inset-right, 0px);
         }
 
         /* 8-Bit Pixel Borders */
@@ -938,7 +944,7 @@
         const GUESSES_PER_WORD = 6;
         const WORD_LENGTH = 5;
         const COUNTDOWN_START = 600;
-        const STORAGE_KEY = 'glyph_arcade_stats';
+        const STORAGE_KEY = 'GL_arcade_stats';
 
         // ── Seeded PRNG (mulberry32) ──────────────────────────────────────────
         function mulberry32(seed) {
@@ -1531,7 +1537,8 @@
                             <details class="mt-8 border-t-2 border-[#003D5B] pt-6">
                                 <summary class="text-[9px] uppercase tracking-widest text-[#54D8A8]/70 mb-4">Patch Notes</summary>
                                 <ul class="text-[8px] leading-[2] space-y-3 text-[#76E0B9]/70 mt-4">
-                                    <li><span class="text-[#00b4d8]">v0.0.15</span> — Version bump.</li>
+                                    <li><span class="text-[#00b4d8]">v0.0.16</span> — Mobile optimisation: added height: 100dvh, overflow: hidden, overscroll-behavior: none and safe-area inset padding; localStorage key standardised to GL prefix.</li>
+                                    <li><span class="text-[#54D8A8]">v0.0.15</span> — Version bump.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.14</span> — Grid line colour updated to gold.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.13</span> — Version bump.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.12</span> — Arctic colour scheme — replaced GG/Teal with Arctic (TC).</li>
