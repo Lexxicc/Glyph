@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="author" content="lexxicc">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GLYPH v0.0.17 - 8-BIT ARCADE</title>
+    <title>GLYPH v0.0.18 - 8-BIT ARCADE</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#54d8a8">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -152,7 +152,7 @@
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            Ver 0.0.17 • Tacticon Studios • © 2026
+            Ver 0.0.18 • Tacticon Studios • © 2026
         </div>
     </div>
 
@@ -1058,6 +1058,7 @@
         }
 
         let roundResolved = false;
+        let nextRoundTimer = null;
 
         let state = {
             view: 'START',
@@ -1149,6 +1150,8 @@
         }
 
         function executeForfeit() {
+            clearTimeout(nextRoundTimer);
+            nextRoundTimer = null;
             clearInterval(state.timerInterval);
             state.timerInterval = null;
             saveMatch(calculateScore(), true);
@@ -1356,12 +1359,12 @@
                 state.solvedCount++;
                 state.message = "CLEARED!";
                 state.isLocked = true;
-                setTimeout(nextRound, 1200);
+                nextRoundTimer = setTimeout(nextRound, 1200);
             } else if (state.guesses.length >= GUESSES_PER_WORD) {
                 roundResolved = true;
                 state.message = `FAIL! WORD: <span style="color:#ef4444">${target}</span>`;
                 state.isLocked = true;
-                setTimeout(nextRound, 2000);
+                nextRoundTimer = setTimeout(nextRound, 2000);
             }
             render();
         }
@@ -1415,7 +1418,7 @@
             state.message = "OVERRIDE: WIN";
             state.isLocked = true;
             closeOverlay();
-            setTimeout(nextRound, 1000);
+            nextRoundTimer = setTimeout(nextRound, 1000);
             render();
         }
 
@@ -1430,7 +1433,7 @@
             state.message = `FAIL! WORD: <span style="color:#ef4444">${target}</span>`;
             state.isLocked = true;
             closeOverlay();
-            setTimeout(nextRound, 2000);
+            nextRoundTimer = setTimeout(nextRound, 2000);
             render();
         }
 
@@ -1544,7 +1547,8 @@
                             <details class="mt-8 border-t-2 border-[#003D5B] pt-6">
                                 <summary class="text-[9px] uppercase tracking-widest text-[#54D8A8]/70 mb-4">Patch Notes</summary>
                                 <ul class="text-[8px] leading-[2] space-y-3 text-[#76E0B9]/70 mt-4">
-                                    <li><span class="text-[#00b4d8]">v0.0.17</span> — PWA install support added.</li>
+                                    <li><span class="text-[#00b4d8]">v0.0.18</span> — Improved service worker: CDN resources now cached for offline support.</li>
+                                    <li><span class="text-[#54D8A8]">v0.0.17</span> — PWA install support added.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.16</span> — Mobile optimisation: added height: 100dvh, overflow: hidden, overscroll-behavior: none and safe-area inset padding; localStorage key standardised to GL prefix.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.15</span> — Version bump.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.14</span> — Grid line colour updated to gold.</li>
@@ -1768,6 +1772,8 @@
 
         window.addEventListener('popstate', () => {
             if (state.view === 'PLAYING') {
+                clearTimeout(nextRoundTimer);
+                nextRoundTimer = null;
                 clearInterval(state.timerInterval);
                 state.timerInterval = null;
                 closeOverlay();
