@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="author" content="lexxicc">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GLYPH v0.0.18 - 8-BIT ARCADE</title>
+    <title>GLYPH v0.0.19 - 8-BIT ARCADE</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#54d8a8">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -65,6 +65,7 @@
             box-shadow: inset -4px -4px 0 0 #3ea17e;
             transition: all 0.1s;
             text-align: center;
+            touch-action: manipulation;
         }
         .pixel-btn:active {
             box-shadow: inset 4px 4px 0 0 #3ea17e;
@@ -131,9 +132,13 @@
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
 
         /* Accordion Styles */
-        details summary { list-style: none; cursor: pointer; outline: none; }
+        details summary { list-style: none; cursor: pointer; outline: none; touch-action: manipulation; }
         details summary::-webkit-details-marker { display: none; }
         details[open] summary { border-bottom: 2px solid #54D8A8; margin-bottom: 10px; }
+        @media (pointer: coarse) {
+            .pixel-btn { padding: 14px; }
+        }
+        .start-menu-btn, .start-back-btn { display: block; width: 100%; }
     </style>
 </head>
 <body>
@@ -141,18 +146,114 @@
         <!-- Header -->
         <div id="game-header" class="w-full max-w-4xl flex flex-col items-center mb-2 pt-2 transition-all">
             <div class="flex flex-col items-center w-fit mb-4" id="header-title-wrap">
-                <h1 class="text-5xl md:text-7xl tracking-tight text-glow mb-4 cursor-pointer" onclick="state.view === 'PLAYING' ? confirmForfeit() : changeView('START')">GLYPH</h1>
+                <h1 class="text-5xl md:text-7xl tracking-tight text-glow mb-4 cursor-pointer" onclick="state.view === 'PLAYING' ? confirmForfeit() : showStartPanel('main')">GLYPH</h1>
                 <div id="header-bar" class="w-full h-[3px] bg-[#54D8A8] rounded-full shadow-[0_0_15px_#54D8A8]"></div>
             </div>
             <p id="header-subtitle" class="text-[9px] md:text-[12px] uppercase tracking-[0.4em] opacity-80 text-center font-bold w-full">COMPETITIVE WORD PUZZLE</p>
         </div>
 
+        <!-- OPW Start Overlay -->
+        <div id="start-overlay" style="display:flex;flex-direction:column;align-items:center;width:100%;flex:1;min-height:0;overflow-y:auto;padding:4px;">
+            <!-- Panel: main -->
+            <div id="panel-main" style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:480px;margin:auto;">
+                <div class="w-full pixel-border animate-fade-in">
+                    <div class="text-center p-6 border-b-4 border-[#54D8A8]">
+                        <p class="text-[10px] mb-2 text-[#54D8A8] tracking-widest uppercase">HIGH SCORE</p>
+                        <p id="ov-high-score" class="text-3xl md:text-5xl text-glow">0</p>
+                    </div>
+                    <div class="flex flex-col p-4 space-y-3">
+                        <button onclick="startMatch({})" class="pixel-btn w-full text-xl md:text-2xl py-4">START MATCH</button>
+                        <div class="pt-1 pb-1">
+                            <p class="text-[7px] text-[#54D8A8] mb-2 uppercase tracking-widest">Accept a challenge</p>
+                            <input id="challenge-code-input" type="text" placeholder="Paste match code..."
+                                class="w-full bg-transparent text-[8px] uppercase tracking-widest outline-none placeholder-[#54D8A8]/30 text-[#76E0B9]"
+                                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                onkeydown="if(event.key==='Enter') acceptChallenge()">
+                            <p id="challenge-error" class="text-[7px] text-[#ef4444] mt-1" style="display:none">Invalid or tampered code.</p>
+                        </div>
+                        <button onclick="acceptChallenge()" class="pixel-btn pixel-btn-secondary w-full text-[12px] py-3 rounded-none">ACCEPT CHALLENGE</button>
+                        <button onclick="showStartPanel('highscores')" class="pixel-btn w-full text-[12px] md:text-[14px] py-3">MATCH HISTORY</button>
+                        <button onclick="showStartPanel('howtoplay')" class="pixel-btn w-full text-[12px] md:text-[14px] py-3">GAME RULES</button>
+                        <button onclick="showStartPanel('settings')" class="pixel-btn w-full text-[12px] md:text-[14px] py-3">SETTINGS</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Panel: howtoplay -->
+            <div id="panel-howtoplay" style="display:none;flex-direction:column;align-items:center;width:100%;max-width:640px;margin:auto;">
+                <div class="w-full pixel-border p-10 animate-fade-in">
+                    <p class="text-[12px] mb-8 border-b-4 border-[#54D8A8] pb-4 text-glow text-center uppercase tracking-widest">Game Manual</p>
+                    <div class="max-h-[500px] overflow-y-auto custom-scroll pr-4">
+                        <ul class="text-[10px] leading-[2.2] space-y-8 text-[#76E0B9]/90">
+                            <li>The goal is simple: solve 3 different hidden words as fast as you can to get the highest score.</li>
+                            <li>You have 6 attempts to find each word. Use them all and the answer is revealed before moving to the next word. The entire match runs on a 10-minute countdown — if time runs out, the match ends immediately.</li>
+                            <li>After each guess, the color of the tiles will change to show how close you were:
+                                <br>&gt; <span style="color:#54D8A8">[GREEN]</span> means the letter is correct and in the right spot.
+                                <br>&gt; <span style="color:#FACC15">[YELLOW]</span> means the letter is in the word, but in the wrong spot.
+                                <br>&gt; <span style="color:#aaaaaa">[GREY]</span> means that letter isn't used in the word at all.
+                            </li>
+                            <li>To help you be precise, if a letter appears only once in the word but you guess it twice, only one tile will light up green or yellow. This tells you exactly how many times that letter is actually used.</li>
+                            <li>Your final score is based on how many words you found and how many guesses you used. Plus, finishing quickly adds a big speed bonus to your total!</li>
+                        </ul>
+                        <details class="mt-8 border-t-2 border-[#003D5B] pt-6">
+                            <summary class="text-[9px] uppercase tracking-widest text-[#54D8A8]/70 mb-4">Patch Notes</summary>
+                            <ul class="text-[8px] leading-[2] space-y-3 text-[#76E0B9]/70 mt-4">
+                                <li><span class="text-[#00b4d8]">v0.0.19</span> — OPW shell retrofit: start overlay with match history, patch notes, and back-button support.</li>
+                                <li><span class="text-[#00b4d8]">v0.0.18</span> — Improved service worker: CDN resources now cached for offline support.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.17</span> — PWA install support added.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.16</span> — Mobile optimisation: added height: 100dvh, overflow: hidden, overscroll-behavior: none and safe-area inset padding; localStorage key standardised to GL prefix.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.15</span> — Version bump.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.14</span> — Grid line colour updated to gold.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.13</span> — Version bump.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.12</span> — Arctic colour scheme.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.11</span> — Version bump.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.10</span> — Fixed 4 bugs: timer/guess race condition; devLose; devWin; popstate dev console fix.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.9</span> — UI Polish: front page panel corner pixels; Accept Challenge border; footer cleanup.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.121</span> — Fixed 4 bugs: round-clear SFX; grid constants; mute label.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.120</span> — Add basic soundscape. Mute/unmute toggle.</li>
+                                <li><span class="text-[#54D8A8]">v0.0.119</span> — Fixed 18 bugs: score drift, timer format, duplicate words, clipboard fallback, forfeit guard, mobile input, challenge Enter key, back-button timer clear, header margin.</li>
+                            </ul>
+                        </details>
+                    </div>
+                    <button onclick="showStartPanel('main')" class="pixel-btn w-full mt-12 text-[12px]">BACK TO MAIN MENU</button>
+                </div>
+            </div>
+            <!-- Panel: highscores -->
+            <div id="panel-highscores" style="display:none;flex-direction:column;align-items:center;width:100%;max-width:640px;margin:auto;">
+                <div class="w-full pixel-border p-10 animate-fade-in">
+                    <p class="text-[12px] mb-8 border-b-4 border-[#54D8A8] pb-4 text-glow text-center uppercase tracking-widest">Match History</p>
+                    <div id="ov-match-history" class="max-h-96 overflow-y-auto custom-scroll pr-4"></div>
+                    <button onclick="showStartPanel('main')" class="pixel-btn w-full mt-12 text-[12px]">BACK TO MAIN MENU</button>
+                </div>
+            </div>
+            <!-- Panel: settings -->
+            <div id="panel-settings" style="display:none;flex-direction:column;align-items:center;width:100%;max-width:480px;margin:auto;">
+                <div class="w-full pixel-border animate-fade-in">
+                    <div class="text-center p-6 border-b-4 border-[#54D8A8]">
+                        <p class="text-[12px] text-glow uppercase tracking-widest">Settings</p>
+                    </div>
+                    <div class="flex flex-col p-6 space-y-6">
+                        <div>
+                            <label class="text-[9px] uppercase tracking-widest text-[#54D8A8] block mb-2">Sound Volume</label>
+                            <input id="ov-sfx-vol" type="range" min="0" max="100" class="w-full accent-[#54D8A8]"
+                                oninput="updateSFXVolume(this.value)">
+                        </div>
+                        <div>
+                            <label class="text-[9px] uppercase tracking-widest text-[#54D8A8] block mb-2">Brightness — <span id="brightness-label">100%</span></label>
+                            <input id="ov-brightness" type="range" min="20" max="150" class="w-full accent-[#54D8A8]"
+                                oninput="updateBrightness(this.value)">
+                        </div>
+                        <button onclick="showStartPanel('main')" class="pixel-btn w-full text-[12px] py-3">BACK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main View Area -->
-        <div id="view" class="w-full flex-1 flex flex-col items-center justify-center min-h-0 overflow-y-auto pt-1 px-1"></div>
+        <div id="view" style="display:none;" class="w-full flex-1 flex flex-col items-center justify-center min-h-0 overflow-y-auto pt-1 px-1"></div>
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            Ver 0.0.18 • Tacticon Studios • © 2026
+            Ver 0.0.19 • Tacticon Studios • © 2026
         </div>
     </div>
 
@@ -952,6 +1053,8 @@
         const WORD_LENGTH = 5;
         const COUNTDOWN_START = 600;
         const STORAGE_KEY = 'GL_arcade_stats';
+        const PANELS = ['main', 'howtoplay', 'highscores', 'settings'];
+        (function(){if(localStorage.getItem('WIPE_PLAYER_HISTORY')){localStorage.removeItem(STORAGE_KEY);localStorage.removeItem('WIPE_PLAYER_HISTORY');}})();
 
         // ── Seeded PRNG (mulberry32) ──────────────────────────────────────────
         function mulberry32(seed) {
@@ -1121,18 +1224,92 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state.stats));
         }
 
+        function renderHighScores() {
+            const hist = state.stats.matchHistory;
+            if (!hist.length) return '<div class="text-[12px] opacity-40 py-16 text-center tracking-widest uppercase">EMPTY LOG</div>';
+            return hist.map(h => {
+                const roundsHtml = (h.rounds || []).map((r, i) => `
+                    <div class="mt-4 border-l-4 border-[#54D8A8] pl-3 py-1 bg-[#00243a]/40">
+                        <p class="text-[8px] text-[#54D8A8] mb-2">PHASE ${i+1}: ${r.word} ${r.isPartial ? '(FORFEITED)' : ''}</p>
+                        <div class="text-[7px] text-white/60 leading-relaxed uppercase">
+                            ${r.guesses.length > 0 ? r.guesses.map(g => `[ ${g} ]`).join(' ') : '[ NO DATA ]'}
+                        </div>
+                    </div>`).join('');
+                const statusTag = h.status === 'FORFEIT' ? '<span style="color:#ef4444;font-size:7px;margin-left:5px;">[FORFEIT]</span>' : '';
+                return `<div class="mb-6 border-b border-[#003D5B] pb-4">
+                    <details class="w-full">
+                        <summary class="flex justify-between items-center text-[10px] w-full">
+                            <span class="opacity-60">${h.date}</span>
+                            <span class="text-[#54D8A8]">${h.score} PTS ${statusTag} <small>▼</small></span>
+                        </summary>
+                        <div class="mt-4 animate-fade-in">
+                            <p class="text-[8px] opacity-40 uppercase mb-2">Match Details:</p>
+                            ${roundsHtml}
+                        </div>
+                    </details>
+                </div>`;
+            }).join('');
+        }
+
+        function showStartPanel(name, fromPopstate) {
+            const overlay = document.getElementById('start-overlay');
+            overlay.style.display = 'flex';
+            viewEl.style.display = 'none';
+            const bar = document.getElementById('header-bar');
+            const subtitle = document.getElementById('header-subtitle');
+            const titleWrap = document.getElementById('header-title-wrap');
+            if (bar) bar.style.display = '';
+            if (subtitle) subtitle.style.display = '';
+            if (titleWrap) titleWrap.style.marginBottom = '';
+            headerEl.classList.remove('mb-4', 'mb-12'); headerEl.classList.add('mb-2');
+            PANELS.forEach(p => {
+                const el = document.getElementById('panel-' + p);
+                if (el) el.style.display = p === name ? 'flex' : 'none';
+            });
+            if (name === 'main') {
+                const hsEl = document.getElementById('ov-high-score');
+                if (hsEl) hsEl.textContent = state.stats.highScore;
+            } else if (name === 'highscores') {
+                document.getElementById('ov-match-history').innerHTML = renderHighScores();
+            } else if (name === 'settings') {
+                const currentBrightness = (() => {
+                    const f = document.body.style.filter;
+                    const m = f && f.match(/brightness\(([0-9.]+)\)/);
+                    return m ? Math.round(parseFloat(m[1]) * 100) : 100;
+                })();
+                const volEl = document.getElementById('ov-sfx-vol');
+                const brightEl = document.getElementById('ov-brightness');
+                const brightLabel = document.getElementById('brightness-label');
+                if (volEl) volEl.value = Math.round(_sfxVol * 100);
+                if (brightEl) brightEl.value = currentBrightness;
+                if (brightLabel) brightLabel.textContent = currentBrightness + '%';
+            }
+            if (!fromPopstate) {
+                if (name === 'main') {
+                    history.replaceState({ panel: 'main' }, '');
+                } else {
+                    history.pushState({ panel: name }, '');
+                }
+            }
+        }
+
         function changeView(newView) {
             state.view = newView;
             if (newView === 'PLAYING') {
                 headerEl.classList.remove('mb-2', 'mb-12'); headerEl.classList.add('mb-4');
-                history.pushState({ view: 'game' }, '');
-            } else if (newView === 'RECORDS' || newView === 'RULES' || newView === 'FINISHED' || newView === 'SETTINGS') {
+                document.getElementById('start-overlay').style.display = 'none';
+                viewEl.style.display = '';
+                history.pushState({ panel: 'game' }, '');
+                render();
+            } else if (newView === 'FINISHED') {
                 headerEl.classList.remove('mb-4', 'mb-12'); headerEl.classList.add('mb-2');
-                history.pushState({ view: newView }, '');
-            } else {
-                headerEl.classList.remove('mb-4', 'mb-12'); headerEl.classList.add('mb-2');
+                document.getElementById('start-overlay').style.display = 'none';
+                viewEl.style.display = '';
+                history.pushState({ panel: 'finished' }, '');
+                render();
+            } else if (newView === 'START') {
+                showStartPanel('main');
             }
-            render();
         }
 
         function confirmForfeit() {
@@ -1502,8 +1679,8 @@
             if (bar) bar.style.display = isPlaying ? 'none' : '';
             if (subtitle) subtitle.style.display = isPlaying ? 'none' : '';
             if (titleWrap) titleWrap.style.marginBottom = isPlaying ? '0' : '';
-            viewEl.style.justifyContent = state.view === 'START' ? 'center' : '';
-            viewEl.style.overflowY = state.view === 'START' ? 'hidden' : 'auto';
+            viewEl.style.justifyContent = '';
+            viewEl.style.overflowY = 'auto';
 
             if (state.view === 'START') {
                 viewEl.innerHTML = `
@@ -1706,7 +1883,7 @@
                                     </div>
                                 </div>`;
                             }).join('')}
-                            <button onclick="changeView('START')" class="pixel-btn w-full text-[12px] py-3 mt-2">MAIN MENU</button>
+                            <button onclick="showStartPanel('main')" class="pixel-btn w-full text-[12px] py-3 mt-2">MAIN MENU</button>
                         </div>`;
 
                 } else {
@@ -1731,7 +1908,7 @@
                             <div id="share-code-section"></div>
                             <div class="flex flex-col space-y-3">
                                 <button id="share-btn" onclick="showMatchCode()" class="pixel-btn pixel-btn-secondary w-full text-[12px] py-3">GENERATE CHALLENGE CODE</button>
-                                <button onclick="changeView('START')" class="pixel-btn w-full text-[12px] py-3">MAIN MENU</button>
+                                <button onclick="showStartPanel('main')" class="pixel-btn w-full text-[12px] py-3">MAIN MENU</button>
                             </div>
                         </div>`;
                 }
@@ -1770,7 +1947,8 @@
             if (k === 'ENTER' || k === 'BKSP' || /^[A-Z]$/.test(k)) handleInput(k);
         });
 
-        window.addEventListener('popstate', () => {
+        window.addEventListener('popstate', (e) => {
+            const panel = e.state && e.state.panel;
             if (state.view === 'PLAYING') {
                 clearTimeout(nextRoundTimer);
                 nextRoundTimer = null;
@@ -1778,12 +1956,15 @@
                 state.timerInterval = null;
                 closeOverlay();
                 confirmForfeit();
-            } else if (state.view === 'RECORDS' || state.view === 'RULES' || state.view === 'FINISHED' || state.view === 'SETTINGS') {
-                changeView('START');
+            } else if (panel === 'game' || panel === 'finished' || state.view === 'FINISHED') {
+                showStartPanel('main', true);
+            } else if (panel && PANELS.includes(panel)) {
+                showStartPanel(panel, true);
             }
         });
 
-        render();
+        history.replaceState({ panel: 'main' }, '');
+        showStartPanel('main', true);
     </script>
 </body>
 </html>
