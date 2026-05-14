@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="author" content="lexxicc">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GLYPH v0.0.20 - 8-BIT ARCADE</title>
+    <title>GLYPH v0.0.21 - 8-BIT ARCADE</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#54d8a8">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
     <style>
         body {
             font-family: 'Press Start 2P', cursive;
-            background-color: #00243a;
+            background-color: #061A2E;
             color: #76E0B9;
             margin: 0;
             height: 100dvh;
@@ -59,7 +59,7 @@
         .pixel-btn {
             position: relative;
             background: #54D8A8;
-            color: #00243a;
+            color: #061A2E;
             padding: 10px;
             border-radius: 0;
             box-shadow: inset -4px -4px 0 0 #3ea17e;
@@ -104,17 +104,17 @@
         }
 
         /* Tile & Key States */
-        .tile-correct { background-color: #54D8A8; color: #00243a; box-shadow: inset -4px -4px 0 0 #3ea17e; }
-        .tile-present { background-color: #FACC15; color: #00243a; box-shadow: inset -4px -4px 0 0 #ca8a04; }
+        .tile-correct { background-color: #54D8A8; color: #061A2E; box-shadow: inset -4px -4px 0 0 #3ea17e; }
+        .tile-present { background-color: #FACC15; color: #061A2E; box-shadow: inset -4px -4px 0 0 #ca8a04; }
         .tile-absent { background-color: #3a3a3a; color: #aaaaaa; box-shadow: inset -4px -4px 0 0 #222222; }
 
         /* Greyed out keyboard state */
         .key-absent  { background-color: #2a2a2a !important; color: #666666 !important; box-shadow: inset -4px -4px 0 0 #1a1a1a !important; }
-        .key-correct { background-color: #54D8A8 !important; color: #00243a !important; box-shadow: inset -4px -4px 0 0 #3ea17e !important; }
-        .key-present { background-color: #FACC15 !important; color: #00243a !important; box-shadow: inset -4px -4px 0 0 #ca8a04 !important; }
+        .key-correct { background-color: #54D8A8 !important; color: #061A2E !important; box-shadow: inset -4px -4px 0 0 #3ea17e !important; }
+        .key-present { background-color: #FACC15 !important; color: #061A2E !important; box-shadow: inset -4px -4px 0 0 #ca8a04 !important; }
 
         .tile-empty { border: 4px solid #003D5B; background: #001D2E; }
-        .tile-active { border: 4px solid #76E0B9; background: #00243a; }
+        .tile-active { border: 4px solid #76E0B9; background: #061A2E; }
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         .blink { animation: blink 0.8s infinite; }
@@ -197,9 +197,9 @@
                         <details class="mt-8 border-t-2 border-[#003D5B] pt-6">
                             <summary class="text-[9px] uppercase tracking-widest text-[#54D8A8]/70 mb-4">Patch Notes</summary>
                             <ul class="text-[8px] leading-[2] space-y-3 text-[#76E0B9]/70 mt-4">
-                                <li><span class="text-[#00b4d8]">v0.0.20</span> — Footer standardised: copyright symbol, year, and version in correct order.</li>
-                                <li><span class="text-[#00b4d8]">v0.0.19</span> — OPW shell retrofit: start overlay with match history, patch notes, and back-button support.</li>
-                                <li><span class="text-[#00b4d8]">v0.0.18</span> — Improved service worker: CDN resources now cached for offline support.</li>
+                                <li><span class="text-[#00BFFF]">v0.0.21</span> — Footer standardised: copyright symbol, year, and version in correct order.</li>
+                                <li><span class="text-[#00BFFF]">v0.0.19</span> — OPW shell retrofit: start overlay with match history, patch notes, and back-button support.</li>
+                                <li><span class="text-[#00BFFF]">v0.0.18</span> — Improved service worker: CDN resources now cached for offline support.</li>
                                 <li><span class="text-[#54D8A8]">v0.0.17</span> — PWA install support added.</li>
                                 <li><span class="text-[#54D8A8]">v0.0.16</span> — Mobile optimisation: added height: 100dvh, overflow: hidden, overscroll-behavior: none and safe-area inset padding; localStorage key standardised to GL prefix.</li>
                                 <li><span class="text-[#54D8A8]">v0.0.15</span> — Version bump.</li>
@@ -254,12 +254,12 @@
 
         <!-- Footer -->
         <div class="text-center opacity-40 text-[7px] tracking-widest uppercase py-1">
-            © Tacticon Studios 2026 — v0.0.20
+            © Tacticon Studios 2026 — v0.0.21
         </div>
     </div>
 
     <!-- Overlay for Dev Console / Confirmations -->
-    <div id="overlay" class="fixed inset-0 z-50 bg-[#00243a]/95 hidden items-center justify-center p-4 backdrop-blur-md"></div>
+    <div id="overlay" class="fixed inset-0 z-50 bg-[#061A2E]/95 hidden items-center justify-center p-4 backdrop-blur-md"></div>
 
     <script>
 
@@ -1230,7 +1230,7 @@
             if (!hist.length) return '<div class="text-[12px] opacity-40 py-16 text-center tracking-widest uppercase">EMPTY LOG</div>';
             return hist.map(h => {
                 const roundsHtml = (h.rounds || []).map((r, i) => `
-                    <div class="mt-4 border-l-4 border-[#54D8A8] pl-3 py-1 bg-[#00243a]/40">
+                    <div class="mt-4 border-l-4 border-[#54D8A8] pl-3 py-1 bg-[#061A2E]/40">
                         <p class="text-[8px] text-[#54D8A8] mb-2">PHASE ${i+1}: ${r.word} ${r.isPartial ? '(FORFEITED)' : ''}</p>
                         <div class="text-[7px] text-white/60 leading-relaxed uppercase">
                             ${r.guesses.length > 0 ? r.guesses.map(g => `[ ${g} ]`).join(' ') : '[ NO DATA ]'}
@@ -1725,9 +1725,9 @@
                             <details class="mt-8 border-t-2 border-[#003D5B] pt-6">
                                 <summary class="text-[9px] uppercase tracking-widest text-[#54D8A8]/70 mb-4">Patch Notes</summary>
                                 <ul class="text-[8px] leading-[2] space-y-3 text-[#76E0B9]/70 mt-4">
-                                    <li><span class="text-[#00b4d8]">v0.0.20</span> — Footer standardised: copyright symbol, year, and version in correct order.</li>
-                                    <li><span class="text-[#00b4d8]">v0.0.19</span> — OPW shell retrofit: start overlay with match history, patch notes, and back-button support.</li>
-                                    <li><span class="text-[#00b4d8]">v0.0.18</span> — Improved service worker: CDN resources now cached for offline support.</li>
+                                    <li><span class="text-[#00BFFF]">v0.0.21</span> — Footer standardised: copyright symbol, year, and version in correct order.</li>
+                                    <li><span class="text-[#00BFFF]">v0.0.19</span> — OPW shell retrofit: start overlay with match history, patch notes, and back-button support.</li>
+                                    <li><span class="text-[#00BFFF]">v0.0.18</span> — Improved service worker: CDN resources now cached for offline support.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.17</span> — PWA install support added.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.16</span> — Mobile optimisation: added height: 100dvh, overflow: hidden, overscroll-behavior: none and safe-area inset padding; localStorage key standardised to GL prefix.</li>
                                     <li><span class="text-[#54D8A8]">v0.0.15</span> — Version bump.</li>
@@ -1749,7 +1749,7 @@
                 const historyHtml = state.stats.matchHistory.length > 0
                     ? state.stats.matchHistory.map(h => {
                         const roundsHtml = (h.rounds || []).map((r, i) => `
-                            <div class="mt-4 border-l-4 border-[#54D8A8] pl-3 py-1 bg-[#00243a]/40">
+                            <div class="mt-4 border-l-4 border-[#54D8A8] pl-3 py-1 bg-[#061A2E]/40">
                                 <p class="text-[8px] text-[#54D8A8] mb-2">PHASE ${i+1}: ${r.word} ${r.isPartial ? '(FORFEITED)' : ''}</p>
                                 <div class="text-[7px] text-white/60 leading-relaxed uppercase">
                                     ${r.guesses.length > 0 ? r.guesses.map(g => `[ ${g} ]`).join(' ') : '[ NO DATA ]'}
@@ -1895,11 +1895,11 @@
                         <div class="w-full max-w-2xl pixel-border p-10 text-center animate-fade-in mx-4">
                             <p class="text-glow text-2xl mb-8 uppercase">Match Complete</p>
                             <div class="grid grid-cols-2 gap-4 mb-8">
-                                <div class="bg-[#00243a] p-4 pixel-border-small">
+                                <div class="bg-[#061A2E] p-4 pixel-border-small">
                                     <p class="text-[10px] mb-3 opacity-60 uppercase">Solved</p>
                                     <p class="text-lg">${state.solvedCount}/${WORDS_TO_SOLVE}</p>
                                 </div>
-                                <div class="bg-[#00243a] p-4 pixel-border-small">
+                                <div class="bg-[#061A2E] p-4 pixel-border-small">
                                     <p class="text-[10px] mb-3 opacity-60 uppercase">Clock</p>
                                     <p class="text-lg">${Math.floor(state.timeLeft/60)}:${(state.timeLeft%60).toString().padStart(2,'0')}</p>
                                 </div>
